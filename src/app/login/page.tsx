@@ -84,9 +84,7 @@ export default function LoginPage() {
   };
 
   const handlePasskeySignIn = async () => {
-    const { error } = await supabase.auth.signInWithWebAuthn({
-      email: email || undefined,
-    });
+    const { error } = await supabase.auth.signInWithPasskey();
     if (error) setError(error.message);
   };
 
