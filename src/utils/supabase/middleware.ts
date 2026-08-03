@@ -34,12 +34,12 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protected routes check
+  const publicRoutes = ["/", "/login", "/features", "/pricing", "/privacy", "/terms", "/contact"];
+  
   if (
     !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth") &&
-    request.nextUrl.pathname !== "/"
+    !publicRoutes.includes(request.nextUrl.pathname) &&
+    !request.nextUrl.pathname.startsWith("/auth")
   ) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
@@ -50,7 +50,6 @@ export async function updateSession(request: NextRequest) {
   if (user && request.nextUrl.pathname === "/login") {
     const url = request.nextUrl.clone();
 
-    console.log({ user });
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }

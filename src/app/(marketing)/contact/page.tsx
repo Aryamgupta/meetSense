@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import Link from 'next/link';
+import Link from "next/link";
 
 export default function ContactPage() {
   const [loading, setLoading] = useState(false);
@@ -41,19 +41,14 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="w-full sticky top-0 z-50 bg-surface-container-lowest border-b border-outline-variant">
-        <nav className="flex justify-between items-center px-margin-mobile md:px-margin-desktop py-4 max-w-7xl mx-auto w-full">
-          <Link href="/" className="flex items-center gap-2">
-            <img src="/logo.png" alt="MeetSense Logo" className="h-8 object-contain" />
-          </Link>
-        </nav>
-      </header>
-      
       <main className="max-w-xl mx-auto px-4 py-16">
         <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-8 shadow-sm">
-          <h1 className="text-display font-display text-on-surface mb-2">Contact Support</h1>
+          <h1 className="text-display font-display text-on-surface mb-2">
+            Contact Support
+          </h1>
           <p className="text-body-md text-on-surface-variant mb-8">
-            Have a question or need help? Send us a message and we'll get back to you as soon as possible.
+            Have a question or need help? Send us a message and we'll get back
+            to you as soon as possible.
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -67,9 +62,12 @@ export default function ContactPage() {
                 Message sent successfully! We'll be in touch.
               </div>
             )}
-            
+
             <div className="space-y-2">
-              <label htmlFor="name" className="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">
+              <label
+                htmlFor="name"
+                className="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider"
+              >
                 Name
               </label>
               <input
@@ -82,7 +80,10 @@ export default function ContactPage() {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="email" className="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">
+              <label
+                htmlFor="email"
+                className="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider"
+              >
                 Email
               </label>
               <input
@@ -95,7 +96,10 @@ export default function ContactPage() {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="message" className="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">
+              <label
+                htmlFor="message"
+                className="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider"
+              >
                 Message
               </label>
               <textarea

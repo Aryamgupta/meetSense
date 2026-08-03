@@ -3,52 +3,6 @@ import Link from "next/link";
 export default function LandingPage() {
   return (
     <>
-      <header className="w-full top-0 sticky z-50 bg-surface-container-lowest border-b border-outline-variant">
-        <nav className="flex justify-between items-center px-margin-mobile md:px-margin-desktop py-4 max-w-7xl mx-auto">
-          <div className="flex items-center gap-2">
-            <img
-              src="/logo.png"
-              alt="MeetSense Logo"
-              className="h-8 object-contain"
-            />
-          </div>
-
-          <div className="hidden md:flex items-center gap-8">
-            <a
-              className="text-primary font-bold border-b-2 border-primary transition-opacity hover:opacity-80"
-              href="#"
-            >
-              Home
-            </a>
-            <a
-              className="text-secondary font-button hover:text-primary transition-colors"
-              href="#"
-            >
-              Features
-            </a>
-            <a
-              className="text-secondary font-button hover:text-primary transition-colors"
-              href="#"
-            >
-              Pricing
-            </a>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link
-              href="/login"
-              className="hidden md:block text-primary font-button hover:underline transition-all"
-            >
-              Login
-            </Link>
-            <Link
-              href="/login"
-              className="bg-primary text-on-primary px-6 py-2.5 rounded-lg font-button inline-flex items-center justify-center hover:brightness-110 active:scale-95 transition-all shadow-sm"
-            >
-              Get Started
-            </Link>
-          </div>
-        </nav>
-      </header>
       <main>
         <section className="relative overflow-hidden pt-16 pb-24 md:pt-32 md:pb-40">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 pointer-events-none">
@@ -73,7 +27,7 @@ export default function LandingPage() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
-                href="/login"
+                href="/login?tab=signup"
                 className="w-full sm:w-auto bg-primary text-on-primary px-8 py-4 rounded-xl font-button text-lg text-center hover:shadow-lg hover:-translate-y-0.5 transition-all active:scale-95 flex items-center justify-center"
               >
                 Try it free
@@ -266,7 +220,7 @@ export default function LandingPage() {
                 </p>
                 <div className="flex flex-col sm:flex-row justify-center gap-4">
                   <Link
-                    href="/login"
+                    href="/login?tab=signup"
                     className="bg-surface-container-lowest text-primary px-8 py-4 rounded-xl font-bold text-center flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-xl shadow-primary/10"
                   >
                     Get Started for Free
@@ -280,67 +234,6 @@ export default function LandingPage() {
           </div>
         </section>
       </main>
-
-      <footer className="w-full bottom-0 bg-surface-container border-t border-outline-variant">
-        <div className="flex flex-col md:flex-row justify-between items-center px-margin-desktop py-stack-lg w-full max-w-7xl mx-auto gap-8">
-          <div className="flex flex-col items-center md:items-start gap-4">
-            <div className="flex items-center gap-2">
-              <img
-                src="/logo.png"
-                alt="MeetSense Logo"
-                className="h-6 object-contain grayscale"
-              />
-            </div>
-            <p className="text-body-sm font-body-sm text-on-surface-variant text-center md:text-left">
-              © 2024 MeetSense Inc. All rights reserved.
-            </p>
-          </div>
-          <div className="flex flex-wrap justify-center gap-8">
-            <a
-              className="text-on-surface-variant font-button hover:underline hover:text-primary transition-all"
-              href="#"
-            >
-              Product
-            </a>
-            <a
-              className="text-on-surface-variant font-button hover:underline hover:text-primary transition-all"
-              href="#"
-            >
-              Solutions
-            </a>
-            <a
-              className="text-on-surface-variant font-button hover:underline hover:text-primary transition-all"
-              href="#"
-            >
-              Privacy
-            </a>
-            <a
-              className="text-on-surface-variant font-button hover:underline hover:text-primary transition-all"
-              href="#"
-            >
-              Terms
-            </a>
-          </div>
-          <div className="flex gap-4">
-            <button className="w-10 h-10 rounded-full bg-surface-container-lowest border border-outline-variant flex items-center justify-center hover:bg-surface transition-colors active:scale-95">
-              <span
-                className="material-symbols-outlined text-lg"
-                data-icon="alternate_email"
-              >
-                alternate_email
-              </span>
-            </button>
-            <button className="w-10 h-10 rounded-full bg-surface-container-lowest border border-outline-variant flex items-center justify-center hover:bg-surface transition-colors active:scale-95">
-              <span
-                className="material-symbols-outlined text-lg"
-                data-icon="public"
-              >
-                public
-              </span>
-            </button>
-          </div>
-        </div>
-      </footer>
     </>
   );
 }
