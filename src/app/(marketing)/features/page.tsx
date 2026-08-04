@@ -29,70 +29,49 @@ export default function FeaturesPage() {
           </div>
         </section>
 
-        {/* Features Grid */}
         <section className="max-w-7xl mx-auto px-4 py-24">
           <div className="grid md:grid-cols-2 gap-8">
             {/* Feature 1 */}
-            <div className="bg-surface-container border border-outline-variant rounded-2xl p-8 hover:border-secondary transition-colors group">
-              <div className="w-12 h-12 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center mb-6">
-                <span className="material-symbols-outlined text-[24px]">
-                  summarize
-                </span>
+            <div className="glass-panel border border-outline-variant/30 rounded-3xl p-8 hover:border-primary/50 transition-all group shadow-sm">
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6">
+                <span className="material-symbols-outlined text-[28px]">forum</span>
               </div>
-              <h3 className="text-headline-md font-bold mb-3 text-on-surface">
-                AI Summary
-              </h3>
+              <h3 className="text-headline-md font-bold mb-3 text-on-surface">Ask MeetSense</h3>
               <p className="text-body-lg text-on-surface-variant">
-                Visualizing complex notes turning into a concise paragraph. We
-                extract the signal from the noise instantly.
+                Chat directly with your past meetings. Ask questions and get instant, cited answers based on your actual conversations.
               </p>
             </div>
 
             {/* Feature 2 */}
-            <div className="bg-surface-container border border-outline-variant rounded-2xl p-8 hover:border-secondary transition-colors group">
-              <div className="w-12 h-12 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center mb-6">
-                <span className="material-symbols-outlined text-[24px]">
-                  task_alt
-                </span>
+            <div className="glass-panel border border-outline-variant/30 rounded-3xl p-8 hover:border-secondary/50 transition-all group shadow-sm">
+              <div className="w-14 h-14 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center mb-6">
+                <span className="material-symbols-outlined text-[28px]">folder_managed</span>
               </div>
-              <h3 className="text-headline-md font-bold mb-3 text-on-surface">
-                Action Item Extraction
-              </h3>
+              <h3 className="text-headline-md font-bold mb-3 text-on-surface">Project & Series Organization</h3>
               <p className="text-body-lg text-on-surface-variant">
-                A list transforming into checked tasks with assigned owners.
-                Never let a follow-up slip through the cracks.
+                Group recurring syncs and categorize meetings into Projects to keep your knowledge base perfectly organized.
               </p>
             </div>
 
             {/* Feature 3 */}
-            <div className="bg-surface-container border border-outline-variant rounded-2xl p-8 hover:border-secondary transition-colors group">
-              <div className="w-12 h-12 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center mb-6">
-                <span className="material-symbols-outlined text-[24px]">
-                  record_voice_over
-                </span>
+            <div className="glass-panel border border-outline-variant/30 rounded-3xl p-8 hover:border-primary/50 transition-all group shadow-sm">
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6">
+                <span className="material-symbols-outlined text-[28px]">task_alt</span>
               </div>
-              <h3 className="text-headline-md font-bold mb-3 text-on-surface">
-                Real-time Transcription
-              </h3>
+              <h3 className="text-headline-md font-bold mb-3 text-on-surface">AI Task Deduplication</h3>
               <p className="text-body-lg text-on-surface-variant">
-                A live-streaming text visual with precise speaker identification
-                and highly accurate speech-to-text.
+                Our AI automatically detects when the same action item comes up across multiple meetings, preventing duplicate tasks.
               </p>
             </div>
 
             {/* Feature 4 */}
-            <div className="bg-surface-container border border-outline-variant rounded-2xl p-8 hover:border-secondary transition-colors group">
-              <div className="w-12 h-12 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center mb-6">
-                <span className="material-symbols-outlined text-[24px]">
-                  integration_instructions
-                </span>
+            <div className="glass-panel border border-outline-variant/30 rounded-3xl p-8 hover:border-secondary/50 transition-all group shadow-sm">
+              <div className="w-14 h-14 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center mb-6">
+                <span className="material-symbols-outlined text-[28px]">search</span>
               </div>
-              <h3 className="text-headline-md font-bold mb-3 text-on-surface">
-                Native Integrations
-              </h3>
+              <h3 className="text-headline-md font-bold mb-3 text-on-surface">Global Semantic Search</h3>
               <p className="text-body-lg text-on-surface-variant">
-                Seamlessly sync insights to Notion and Slack. MeetSense acts as
-                a central intelligence layer for your existing tools.
+                Don't remember which meeting it was in? Search by meaning, not just keywords, across your entire meeting history.
               </p>
             </div>
           </div>

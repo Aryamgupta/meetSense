@@ -10,20 +10,18 @@ export default function LandingPage() {
             <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-secondary-fixed opacity-30 blur-[120px] rounded-full"></div>
           </div>
           <div className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop text-center">
-            <div className="inline-flex items-center gap-2 bg-surface-container-lowest border border-outline-variant px-4 py-1.5 rounded-full mb-8 shadow-sm animate-fade-in">
-              <span className="flex h-2 w-2 rounded-full bg-status-success animate-pulse"></span>
-              <span className="text-label-md font-label-md text-secondary">
-                New: AI Summarization v2.0
+            <div className="inline-flex items-center gap-2 glass-panel border border-primary/30 px-4 py-1.5 rounded-full mb-8 shadow-sm animate-fade-in">
+              <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse"></span>
+              <span className="text-label-md font-label-md text-primary font-bold tracking-wide">
+                New: Ask MeetSense & Semantic Search
               </span>
             </div>
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-bold tracking-tight text-on-surface mb-6 max-w-4xl mx-auto leading-[1.1]">
-              Turn every meeting into{" "}
-              <span className="text-primary italic">action</span>
+              Chat directly with your{" "}
+              <span className="text-primary italic">meetings</span>
             </h1>
             <p className="text-body-lg text-on-surface-variant max-w-2xl mx-auto mb-10 leading-relaxed font-body-md">
-              Stop losing key insights in the noise. MeetSense uses
-              enterprise-grade AI to transcribe, summarize, and sync your tasks
-              instantly.
+              Stop losing key insights in the noise. MeetSense uses enterprise-grade AI to transcribe, summarize, group by projects, and lets you chat with your entire knowledge base instantly.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
@@ -60,60 +58,46 @@ export default function LandingPage() {
                 Three simple steps to a more productive workflow.
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
-              <div className="hidden md:block absolute top-12 left-[20%] right-[20%] h-[2px] bg-gradient-to-r from-transparent via-outline-variant to-transparent -z-0"></div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
+              <div className="hidden md:block absolute top-12 left-[10%] right-[10%] h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent -z-0"></div>
 
               <div className="flex flex-col items-center text-center relative z-10">
-                <div className="w-24 h-24 rounded-2xl bg-surface-container-high flex items-center justify-center mb-6 shadow-sm border border-outline-variant">
-                  <span
-                    className="material-symbols-outlined text-primary text-4xl"
-                    data-icon="upload_file"
-                  >
-                    upload_file
-                  </span>
+                <div className="w-24 h-24 rounded-[32px] glass-panel flex items-center justify-center mb-6 shadow-premium border border-primary/20">
+                  <span className="material-symbols-outlined text-primary text-4xl" data-icon="upload_file">upload_file</span>
                 </div>
-                <h3 className="text-headline-sm font-headline-sm text-on-surface mb-3">
-                  1. Upload
-                </h3>
-                <p className="text-body-md text-on-surface-variant max-w-[280px]">
-                  Upload your video or audio recording from Zoom, Teams, or
-                  Google Meet.
+                <h3 className="text-headline-sm font-bold text-on-surface mb-3">1. Upload</h3>
+                <p className="text-body-md text-on-surface-variant max-w-[240px]">
+                  Upload your video or audio recording from Zoom, Teams, or Google Meet.
                 </p>
               </div>
 
               <div className="flex flex-col items-center text-center relative z-10">
-                <div className="w-24 h-24 rounded-2xl bg-surface-container-high flex items-center justify-center mb-6 shadow-sm border border-outline-variant">
-                  <span
-                    className="material-symbols-outlined text-secondary text-4xl"
-                    data-icon="auto_awesome"
-                  >
-                    auto_awesome
-                  </span>
+                <div className="w-24 h-24 rounded-[32px] glass-panel flex items-center justify-center mb-6 shadow-premium border border-primary/20">
+                  <span className="material-symbols-outlined text-secondary text-4xl" data-icon="folder_managed">folder_managed</span>
                 </div>
-                <h3 className="text-headline-sm font-headline-sm text-on-surface mb-3">
-                  2. AI Extracts
-                </h3>
-                <p className="text-body-md text-on-surface-variant max-w-[280px]">
-                  Our model identifies speakers, key decisions, and creates a
-                  concise summary.
+                <h3 className="text-headline-sm font-bold text-on-surface mb-3">2. Organize</h3>
+                <p className="text-body-md text-on-surface-variant max-w-[240px]">
+                  Group your recurring syncs into specific Series and Projects seamlessly.
                 </p>
               </div>
 
               <div className="flex flex-col items-center text-center relative z-10">
-                <div className="w-24 h-24 rounded-2xl bg-surface-container-high flex items-center justify-center mb-6 shadow-sm border border-outline-variant">
-                  <span
-                    className="material-symbols-outlined text-primary text-4xl"
-                    data-icon="task_alt"
-                  >
-                    task_alt
-                  </span>
+                <div className="w-24 h-24 rounded-[32px] glass-panel flex items-center justify-center mb-6 shadow-premium border border-primary/20">
+                  <span className="material-symbols-outlined text-primary text-4xl" data-icon="task_alt">task_alt</span>
                 </div>
-                <h3 className="text-headline-sm font-headline-sm text-on-surface mb-3">
-                  3. Track Items
-                </h3>
-                <p className="text-body-md text-on-surface-variant max-w-[280px]">
-                  Sync action items directly to Notion, Slack, or Jira and track
-                  their progress.
+                <h3 className="text-headline-sm font-bold text-on-surface mb-3">3. Track Items</h3>
+                <p className="text-body-md text-on-surface-variant max-w-[240px]">
+                  AI automatically extracts and deduplicates action items across all your meetings.
+                </p>
+              </div>
+
+              <div className="flex flex-col items-center text-center relative z-10">
+                <div className="w-24 h-24 rounded-[32px] glass-panel flex items-center justify-center mb-6 shadow-premium border border-primary/20">
+                  <span className="material-symbols-outlined text-secondary text-4xl" data-icon="forum">forum</span>
+                </div>
+                <h3 className="text-headline-sm font-bold text-on-surface mb-3">4. Ask MeetSense</h3>
+                <p className="text-body-md text-on-surface-variant max-w-[240px]">
+                  Chat directly with your knowledge base to get instant, cited answers.
                 </p>
               </div>
             </div>
@@ -172,33 +156,23 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              <div className="md:col-span-1 bg-surface-container-lowest border border-outline-variant rounded-xl p-8 flex flex-col justify-between hover:border-primary/30 transition-all">
-                <span
-                  className="material-symbols-outlined text-primary text-3xl mb-4"
-                  data-icon="security"
-                >
-                  security
-                </span>
+              <div className="md:col-span-1 glass-panel border border-outline-variant/30 rounded-3xl p-8 flex flex-col justify-between hover:border-primary/50 transition-all">
+                <span className="material-symbols-outlined text-primary text-4xl mb-4" data-icon="search">search</span>
                 <div>
-                  <h4 className="font-bold mb-1">SOC-2 Secure</h4>
-                  <p className="text-label-md text-on-surface-variant">
-                    Your data is encrypted and private by default.
+                  <h4 className="font-bold text-headline-sm mb-2">Semantic Search</h4>
+                  <p className="text-body-md text-on-surface-variant">
+                    Find the exact moment a topic was discussed across all your meetings instantly.
                   </p>
                 </div>
               </div>
 
-              <div className="md:col-span-1 bg-primary text-on-primary rounded-xl p-8 flex flex-col justify-between group cursor-pointer overflow-hidden relative">
-                <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <span
-                  className="material-symbols-outlined text-3xl mb-4"
-                  data-icon="rocket_launch"
-                >
-                  rocket_launch
-                </span>
+              <div className="md:col-span-1 bg-gradient-to-br from-primary to-secondary text-white rounded-3xl p-8 flex flex-col justify-between group cursor-pointer overflow-hidden relative shadow-premium">
+                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <span className="material-symbols-outlined text-4xl mb-4" data-icon="forum">forum</span>
                 <div>
-                  <h4 className="font-bold mb-1">Scale Fast</h4>
-                  <p className="text-label-md text-on-primary/80">
-                    Enterprise-ready for teams of all sizes.
+                  <h4 className="font-bold text-headline-sm mb-2">Ask MeetSense</h4>
+                  <p className="text-body-md text-white/90">
+                    Chat with your notes. Get precise answers with direct citations.
                   </p>
                 </div>
               </div>
