@@ -5,13 +5,13 @@ export default function Footer() {
     <footer className="w-full bg-surface-container border-t border-outline-variant mt-auto">
       <div className="flex flex-col md:flex-row justify-between items-center px-margin-desktop py-stack-lg w-full max-w-7xl mx-auto gap-8">
         <div className="flex flex-col items-center md:items-start gap-4">
-          <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <img
-              src="/logo.png"
+              src="/logo.svg"
               alt="MeetSense Logo"
-              className="h-6 object-contain grayscale"
+              className="h-8 md:h-10 object-contain grayscale"
             />
-          </div>
+          </Link>
           <p className="text-body-sm font-body-sm text-on-surface-variant text-center md:text-left">
             © 2024 MeetSense Inc. All rights reserved.
           </p>

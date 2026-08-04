@@ -1,12 +1,14 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { createBrowserClient } from "@supabase/ssr";
 
 function LoginContent() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -43,6 +45,7 @@ function LoginContent() {
         });
         if (error) throw error;
         setSuccessMsg("Password reset email sent! Please check your inbox.");
+        setEmail("");
       } else if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -70,6 +73,11 @@ function LoginContent() {
           },
         });
         if (error) throw error;
+
+        // Handle Supabase Email Enumeration Protection fake success
+        if (data.user && data.user.identities && data.user.identities.length === 0) {
+          throw new Error("An account with this email already exists. Please sign in instead.");
+        }
 
         if (data.session === null) {
           setSuccessMsg("Account created! Please check your email to confirm your account.");
@@ -129,33 +137,35 @@ function LoginContent() {
   return (
     <main className="w-full max-w-md">
       <header className="flex flex-col items-center mb-stack-lg">
-        <div className="flex items-center gap-2 mb-4">
+        <Link href="/" className="flex items-center gap-2 mb-4 hover:opacity-80 transition-opacity">
           <img src="/logo.svg" alt="MeetSense Logo" className="h-14 object-contain" />
-        </div>
+        </Link>
       </header>
 
       <div
         className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden transition-all-200"
         id="auth-card"
       >
-        <div className="flex border-b border-outline-variant">
-          <button
-            type="button"
-            onClick={() => switchTab(true)}
-            className={`flex-1 py-4 text-label-md font-label-md transition-all-200 ${isLogin && !isForgotPassword ? "text-primary border-b-2 border-primary" : "text-on-surface-variant"}`}
-            id="login-tab"
-          >
-            SIGN IN
-          </button>
-          <button
-            type="button"
-            onClick={() => switchTab(false)}
-            className={`flex-1 py-4 text-label-md font-label-md transition-all-200 hover:text-primary ${!isLogin && !isForgotPassword ? "text-primary border-b-2 border-primary" : "text-on-surface-variant"}`}
-            id="signup-tab"
-          >
-            SIGN UP
-          </button>
-        </div>
+        {!isForgotPassword && (
+          <div className="flex border-b border-outline-variant">
+            <button
+              type="button"
+              onClick={() => switchTab(true)}
+              className={`flex-1 py-4 text-label-md font-label-md transition-all-200 ${isLogin && !isForgotPassword ? "text-primary border-b-2 border-primary" : "text-on-surface-variant"}`}
+              id="login-tab"
+            >
+              SIGN IN
+            </button>
+            <button
+              type="button"
+              onClick={() => switchTab(false)}
+              className={`flex-1 py-4 text-label-md font-label-md transition-all-200 hover:text-primary ${!isLogin && !isForgotPassword ? "text-primary border-b-2 border-primary" : "text-on-surface-variant"}`}
+              id="signup-tab"
+            >
+              SIGN UP
+            </button>
+          </div>
+        )}
         <div className="p-stack-lg md:p-10">
           <div className="text-center mb-stack-lg">
             <h2
@@ -278,38 +288,50 @@ function LoginContent() {
               />
             </div>
             
-            <div className="space-y-unit">
-              <div className="flex justify-between items-center">
-                <label
-                  className="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider"
-                  htmlFor="password"
-                >
-                  Password
-                </label>
-                {isLogin && !isForgotPassword && (
+            {!isForgotPassword && (
+              <div className="space-y-unit animate-fade-in">
+                <div className="flex justify-between items-center">
+                  <label
+                    className="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider"
+                    htmlFor="password"
+                  >
+                    Password
+                  </label>
+                  {isLogin && (
+                    <button
+                      type="button"
+                      className="text-body-sm font-body-sm text-primary hover:underline"
+                      id="forgot-password"
+                      onClick={() => setIsForgotPassword(true)}
+                    >
+                      Forgot password?
+                    </button>
+                  )}
+                </div>
+                <div className="relative">
+                  <input
+                    className="w-full px-4 py-3 rounded-lg border border-outline-variant bg-white text-body-md focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all-200 pr-12"
+                    id="password"
+                    placeholder="••••••••"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={8}
+                  />
                   <button
                     type="button"
-                    className="text-body-sm font-body-sm text-primary hover:underline"
-                    id="forgot-password"
-                    onClick={() => setIsForgotPassword(true)}
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors focus:outline-none"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
-                    Forgot password?
+                    <span className="material-symbols-outlined text-[20px]">
+                      {showPassword ? "visibility_off" : "visibility"}
+                    </span>
                   </button>
-                )}
+                </div>
               </div>
-              {!isForgotPassword && (
-                <input
-                  className="w-full px-4 py-3 rounded-lg border border-outline-variant bg-white text-body-md focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all-200"
-                  id="password"
-                  placeholder="••••••••"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={8}
-                />
-              )}
-            </div>
+            )}
             
             <button
               className="w-full bg-primary text-on-primary py-3 px-4 rounded-lg text-button font-button hover:bg-primary/90 transition-all-200 shadow-sm active:scale-[0.98] mt-4 disabled:opacity-50"

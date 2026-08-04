@@ -5,6 +5,9 @@ import { createBrowserClient } from "@supabase/ssr";
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -21,6 +24,9 @@ export default function ResetPasswordPage() {
     setError(null);
 
     try {
+      if (password !== confirmPassword) {
+        throw new Error("Passwords do not match");
+      }
       const { error } = await supabase.auth.updateUser({
         password: password,
       });
@@ -41,7 +47,7 @@ export default function ResetPasswordPage() {
     <main className="w-full max-w-md mx-auto mt-20 px-4">
       <header className="flex flex-col items-center mb-stack-lg">
         <div className="flex items-center gap-2 mb-4">
-          <img src="/logo.png" alt="MeetSense Logo" className="h-12 object-contain" />
+          <img src="/logo.svg" alt="MeetSense Logo" className="h-12 object-contain" />
         </div>
       </header>
 
@@ -74,16 +80,55 @@ export default function ResetPasswordPage() {
               <label className="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider" htmlFor="password">
                 New Password
               </label>
-              <input
-                className="w-full px-4 py-3 rounded-lg border border-outline-variant bg-white text-body-md focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all-200"
-                id="password"
-                placeholder="••••••••"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-              />
+              <div className="relative">
+                <input
+                  className="w-full px-4 py-3 rounded-lg border border-outline-variant bg-white text-body-md focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all-200 pr-12"
+                  id="password"
+                  placeholder="••••••••"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={8}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors focus:outline-none"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  <span className="material-symbols-outlined text-[20px]">
+                    {showPassword ? "visibility_off" : "visibility"}
+                  </span>
+                </button>
+              </div>
+            </div>
+            <div className="space-y-unit">
+              <label className="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider" htmlFor="confirmPassword">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <input
+                  className="w-full px-4 py-3 rounded-lg border border-outline-variant bg-white text-body-md focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all-200 pr-12"
+                  id="confirmPassword"
+                  placeholder="••••••••"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  minLength={8}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors focus:outline-none"
+                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                >
+                  <span className="material-symbols-outlined text-[20px]">
+                    {showConfirmPassword ? "visibility_off" : "visibility"}
+                  </span>
+                </button>
+              </div>
             </div>
             <button
               className="w-full bg-primary text-on-primary py-3 px-4 rounded-lg text-button font-button hover:bg-primary/90 transition-all-200 shadow-sm active:scale-[0.98] mt-4 disabled:opacity-50"
