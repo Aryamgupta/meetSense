@@ -6,9 +6,9 @@ export default function Header() {
       <nav className="flex justify-between items-center px-margin-mobile md:px-margin-desktop py-4 max-w-7xl mx-auto">
         <Link href="/" className="flex items-center gap-2">
           <img
-            src="/logo.png"
+            src="/logo.svg"
             alt="MeetSense Logo"
-            className="h-8 object-contain"
+            className="h-10 md:h-12 object-contain"
           />
         </Link>
 
