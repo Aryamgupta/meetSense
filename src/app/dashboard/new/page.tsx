@@ -2,7 +2,9 @@
 
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { createClient } from '@/utils/supabase/client'
+import toast from 'react-hot-toast'
 
 export default function NewMeetingPage() {
   const router = useRouter()
@@ -13,6 +15,25 @@ export default function NewMeetingPage() {
   const [transcript, setTranscript] = useState('')
   const [audioFile, setAudioFile] = useState<File | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [projectId, setProjectId] = useState<string>('')
+  const [seriesId, setSeriesId] = useState<string>('')
+  const supabase = createClient()
+
+  const { data: projects } = useQuery({
+    queryKey: ['projects'],
+    queryFn: async () => {
+      const { data } = await supabase.from('projects').select('*').order('created_at', { ascending: false })
+      return data || []
+    }
+  })
+
+  const { data: seriesList } = useQuery({
+    queryKey: ['series'],
+    queryFn: async () => {
+      const { data } = await supabase.from('meeting_series').select('*').order('created_at', { ascending: false })
+      return data || []
+    }
+  })
   
   // Loading state
   const [uploadState, setUploadState] = useState<'idle' | 'transcribing' | 'extracting' | 'done'>('idle')
@@ -30,6 +51,8 @@ export default function NewMeetingPage() {
       const formData = new FormData()
       formData.append('file', audioFile as Blob)
       formData.append('title', title)
+      if (projectId) formData.append('project_id', projectId)
+      if (seriesId) formData.append('series_id', seriesId)
 
       const uploadRes = await fetch('/api/meetings/upload-audio', {
         method: 'POST',
@@ -48,6 +71,7 @@ export default function NewMeetingPage() {
     onSuccess: (meetingId) => {
       setUploadState('done')
       queryClient.invalidateQueries({ queryKey: ['meetings'] })
+      toast.success('Meeting analyzed successfully!')
       setTimeout(() => {
         router.push(`/dashboard/meetings/${meetingId}`)
       }, 500)
@@ -55,7 +79,7 @@ export default function NewMeetingPage() {
     onError: (error) => {
       console.error(error)
       setUploadState('idle')
-      alert('Failed to process meeting: ' + error.message)
+      toast.error('Failed to process meeting: ' + error.message)
     }
   })
 
@@ -65,7 +89,7 @@ export default function NewMeetingPage() {
       const uploadRes = await fetch('/api/meetings/upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, transcript })
+        body: JSON.stringify({ title, transcript, project_id: projectId || undefined, series_id: seriesId || undefined })
       })
       if (!uploadRes.ok) throw new Error('Upload failed')
       const { meetingId } = await uploadRes.json()
@@ -79,6 +103,7 @@ export default function NewMeetingPage() {
     onSuccess: (meetingId) => {
       setUploadState('done')
       queryClient.invalidateQueries({ queryKey: ['meetings'] })
+      toast.success('Meeting analyzed successfully!')
       setTimeout(() => {
         router.push(`/dashboard/meetings/${meetingId}`)
       }, 500)
@@ -86,7 +111,7 @@ export default function NewMeetingPage() {
     onError: (error) => {
       console.error(error)
       setUploadState('idle')
-      alert('Failed to process text: ' + error.message)
+      toast.error('Failed to process text: ' + error.message)
     }
   })
 
@@ -105,8 +130,9 @@ export default function NewMeetingPage() {
       const file = new File([blob], 'generated_meeting.mp3', { type: 'audio/mpeg' })
       setAudioFile(file)
       setActiveTab('upload')
+      toast.success('Generated MP3 loaded!')
     } catch (error: any) {
-      alert(error.message)
+      toast.error(error.message)
     } finally {
       setIsGenerating(false)
     }
@@ -121,27 +147,50 @@ export default function NewMeetingPage() {
   }
 
   return (
-    <div className="bg-background-page text-on-surface min-h-screen">
-      <header className="w-full sticky top-0 bg-surface-container-lowest border-b border-outline-variant z-40">
-        <div className="flex justify-between items-center px-4 md:px-margin-desktop py-4 w-full max-w-full mx-auto">
-          <div className="flex items-center gap-4">
-            <button onClick={() => router.push('/dashboard')} className="flex items-center justify-center p-2 rounded-lg hover:bg-surface-container-low transition-all cursor-pointer">
-              <span className="material-symbols-outlined text-on-surface-variant">arrow_back</span>
-            </button>
-            <h1 className="text-headline-sm font-headline-sm font-bold text-primary">New Meeting</h1>
-          </div>
-        </div>
-      </header>
+    <div className="bg-transparent text-on-surface h-full flex flex-col relative overflow-hidden">
+      {/* Decorative background blur */}
+      <div className="absolute top-[0%] left-[10%] w-[50%] h-[50%] bg-primary/20 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+      <div className="absolute bottom-[20%] right-[10%] w-[40%] h-[40%] bg-secondary/20 rounded-full blur-[100px] pointer-events-none -z-10"></div>
 
-      <main className="max-w-3xl mx-auto px-4 md:px-0 py-12">
-        <div className="mb-8">
-          <input 
-            type="text" 
-            placeholder="Meeting Title (Optional)" 
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full bg-transparent text-display font-display text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-0 border-none px-0"
-          />
+      <main className="max-w-3xl mx-auto px-4 md:px-0 py-12 w-full relative z-10">
+        
+        <div className="flex items-center gap-3 mb-8">
+          <span className="material-symbols-outlined text-primary text-[32px]">add_circle</span>
+          <h1 className="text-display font-display font-bold gradient-text">New Meeting</h1>
+        </div>
+
+        <div className="glass-panel border border-outline-variant/30 rounded-3xl shadow-premium p-8 mb-8 animate-in fade-in slide-in-from-bottom-4">
+          <div className="flex flex-col gap-6">
+            <input 
+              type="text" 
+              placeholder="Meeting Title (Optional)" 
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full bg-transparent text-headline-md font-display text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-0 border-b border-outline-variant/50 focus:border-primary px-2 py-4 transition-colors"
+            />
+            <div className="flex flex-col sm:flex-row gap-4 w-full">
+              <select
+                value={projectId}
+                onChange={(e) => setProjectId(e.target.value)}
+                className="flex-1 glass-input border border-outline-variant/50 text-on-surface text-body-md rounded-xl px-4 py-4 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none cursor-pointer"
+              >
+                <option value="">No Project</option>
+                {projects?.map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+              <select
+                value={seriesId}
+                onChange={(e) => setSeriesId(e.target.value)}
+                className="flex-1 glass-input border border-outline-variant/50 text-on-surface text-body-md rounded-xl px-4 py-4 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none cursor-pointer"
+              >
+                <option value="">Not a Series</option>
+                {seriesList?.map(s => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
         </div>
 
         <div className="flex gap-8 mb-8 border-b border-outline-variant">
@@ -160,9 +209,9 @@ export default function NewMeetingPage() {
         </div>
 
         {activeTab === 'upload' && (
-          <div className="space-y-stack-lg transition-all duration-300">
+          <div className="space-y-stack-lg transition-all duration-300 animate-in fade-in">
             <div 
-              className="bg-surface-container-lowest border-2 border-dashed border-outline-variant rounded-xl p-12 flex flex-col items-center justify-center text-center transition-all hover:border-primary-container group shadow-sm hover:shadow-md cursor-pointer"
+              className="glass-panel border-2 border-dashed border-primary/30 rounded-3xl p-12 flex flex-col items-center justify-center text-center transition-all hover:border-primary hover:bg-white/20 group shadow-sm hover:shadow-md cursor-pointer"
               onClick={() => fileInputRef.current?.click()}
             >
               <input 
@@ -172,12 +221,12 @@ export default function NewMeetingPage() {
                 accept="audio/*" 
                 className="hidden" 
               />
-              <div className="w-16 h-16 bg-surface-container-low rounded-full flex items-center justify-center mb-6 group-hover:bg-primary-fixed transition-colors">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
                 <span className="material-symbols-outlined text-primary text-4xl" data-icon="cloud_upload">
                   {audioFile ? 'audio_file' : 'cloud_upload'}
                 </span>
               </div>
-              <h2 className="text-headline-sm font-headline-sm mb-2">
+              <h2 className="text-headline-sm font-bold text-on-surface mb-2">
                 {audioFile ? audioFile.name : 'Upload audio file'}
               </h2>
               <p className="text-body-md text-on-surface-variant mb-8 max-w-md">
@@ -186,7 +235,7 @@ export default function NewMeetingPage() {
                   : 'Supported formats: MP3, WAV, M4A. Maximum file size 25MB (Groq Limit).'
                 }
               </p>
-              <button className="bg-surface-container-lowest border border-outline-variant text-primary font-label-md px-6 py-2.5 rounded-lg hover:bg-surface-container-low transition-all">
+              <button className="bg-white/50 border border-outline-variant/30 text-on-surface font-semibold px-6 py-2.5 rounded-full hover:bg-white/70 transition-all shadow-sm">
                 {audioFile ? 'Change file' : 'Browse files'}
               </button>
             </div>
@@ -194,13 +243,13 @@ export default function NewMeetingPage() {
         )}
 
         {activeTab === 'paste' && (
-          <div className="space-y-stack-lg transition-all duration-300">
-            <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
-              <label className="block text-label-md font-label-md text-on-surface-variant mb-3">Paste your meeting transcript here</label>
+          <div className="space-y-stack-lg transition-all duration-300 animate-in fade-in">
+            <div className="glass-panel border border-outline-variant/30 rounded-3xl p-6 shadow-premium">
+              <label className="block text-label-md font-semibold text-on-surface-variant mb-3">Paste your meeting transcript here</label>
               <textarea 
                 value={transcript}
                 onChange={(e) => setTranscript(e.target.value)}
-                className="w-full h-80 bg-surface-container-lowest border border-outline-variant rounded-lg p-4 text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all placeholder:text-outline-variant text-on-surface" 
+                className="w-full h-80 glass-input border border-outline-variant/30 rounded-2xl p-6 text-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none transition-all placeholder:text-outline-variant text-on-surface" 
                 placeholder="Speaker 1: Hi everyone, let's start the sync..."
               />
               
@@ -209,7 +258,7 @@ export default function NewMeetingPage() {
                   <button 
                     onClick={generateDevAudio}
                     disabled={!transcript || isGenerating}
-                    className="flex items-center gap-2 bg-secondary-container text-on-secondary-container px-4 py-2 rounded-lg font-label-md hover:bg-secondary-fixed-dim transition-colors disabled:opacity-50"
+                    className="flex items-center gap-2 bg-secondary-container text-on-secondary-container px-4 py-2 rounded-full font-semibold hover:bg-secondary-fixed-dim transition-colors disabled:opacity-50 shadow-sm"
                   >
                     <span className="material-symbols-outlined text-[18px]">
                       {isGenerating ? 'hourglass_empty' : 'graphic_eq'}
@@ -264,11 +313,11 @@ export default function NewMeetingPage() {
             </div>
           </div>
         ) : (
-          <div className="mt-12 flex flex-col items-center">
+          <div className="mt-12 flex flex-col items-center pb-20">
             <button 
               onClick={handleProcess}
               disabled={activeTab === 'upload' ? !audioFile : !transcript}
-              className="w-full md:w-auto min-w-[240px] bg-primary text-on-primary font-label-md text-lg px-8 py-4 rounded-xl shadow-lg hover:bg-primary-container disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+              className="w-full md:w-auto min-w-[280px] bg-gradient-to-r from-primary to-secondary text-white font-bold text-lg px-8 py-4 rounded-full shadow-premium hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-all flex items-center justify-center gap-3 hover:scale-105"
             >
               Analyze Meeting
               <span className="material-symbols-outlined">auto_awesome</span>

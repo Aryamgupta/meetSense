@@ -1,0 +1,179 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { createClient } from '@/utils/supabase/client'
+import toast from 'react-hot-toast'
+
+export default function ProjectsPage() {
+  const router = useRouter()
+  const supabase = createClient()
+  const queryClient = useQueryClient()
+  
+  const [isCreating, setIsCreating] = useState(false)
+  const [newProjectName, setNewProjectName] = useState('')
+  const [newProjectDesc, setNewProjectDesc] = useState('')
+
+  const { data: projects, isLoading } = useQuery({
+    queryKey: ['projects'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      return data || []
+    }
+  })
+
+  const createProjectMutation = useMutation({
+    mutationFn: async () => {
+      const { data: userData } = await supabase.auth.getUser()
+      if (!userData?.user) throw new Error('Not logged in')
+
+      const { error } = await supabase.from('projects').insert({
+        user_id: userData.user.id,
+        name: newProjectName,
+        description: newProjectDesc
+      })
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
+      setIsCreating(false)
+      setNewProjectName('')
+      setNewProjectDesc('')
+      toast.success('Project created successfully')
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to create project: ${error.message}`)
+    }
+  })
+
+  const handleCreate = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newProjectName.trim()) return
+    createProjectMutation.mutate()
+  }
+
+  return (
+    <div className="bg-background-page text-on-surface min-h-screen flex flex-col">
+      <main className="flex-1 overflow-y-auto px-4 py-8 md:py-12 md:px-margin-desktop w-full max-w-5xl mx-auto">
+        <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center gap-3">
+            <span className="material-symbols-outlined text-primary text-[32px]">folder_open</span>
+            <h1 className="text-display font-display font-bold gradient-text">Projects</h1>
+          </div>
+          <button 
+            onClick={() => setIsCreating(true)}
+            className="bg-gradient-to-r from-primary to-secondary text-white text-button px-6 py-3 rounded-full flex items-center gap-2 shadow-premium hover:shadow-lg hover:scale-105 transition-all"
+          >
+            <span className="material-symbols-outlined text-[20px]">add</span>
+            <span className="hidden sm:inline">New Project</span>
+          </button>
+        </div>
+        
+        {isCreating && (
+          <div className="mb-8 glass-panel border border-primary/30 rounded-3xl p-8 shadow-premium animate-in slide-in-from-top-4">
+            <h2 className="text-headline-md font-bold mb-6 text-on-surface">Create New Project</h2>
+            <form onSubmit={handleCreate} className="flex flex-col gap-5">
+              <div>
+                <label className="block text-label-md font-semibold text-on-surface-variant mb-2 uppercase tracking-wider">Project Name</label>
+                <input 
+                  type="text" 
+                  value={newProjectName}
+                  onChange={(e) => setNewProjectName(e.target.value)}
+                  className="w-full glass-input rounded-xl px-5 py-4 text-body-lg focus:outline-none"
+                  placeholder="e.g. Q3 Roadmap"
+                  required
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="block text-label-md font-semibold text-on-surface-variant mb-2 uppercase tracking-wider">Description (Optional)</label>
+                <input 
+                  type="text" 
+                  value={newProjectDesc}
+                  onChange={(e) => setNewProjectDesc(e.target.value)}
+                  className="w-full glass-input rounded-xl px-5 py-4 text-body-lg focus:outline-none"
+                  placeholder="Brief description of this project scope"
+                />
+              </div>
+              <div className="flex justify-end gap-4 mt-6">
+                <button 
+                  type="button" 
+                  onClick={() => setIsCreating(false)}
+                  className="px-6 py-3 rounded-full text-button font-semibold text-on-surface-variant hover:bg-white/50 transition-all"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  disabled={!newProjectName.trim() || createProjectMutation.isPending}
+                  className="px-6 py-3 rounded-full text-button font-bold bg-gradient-to-r from-primary to-secondary text-white hover:shadow-lg disabled:opacity-50 transition-all hover:scale-105"
+                >
+                  {createProjectMutation.isPending ? 'Creating...' : 'Create Project'}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {isLoading ? (
+          <div className="space-y-4">
+            {[...Array(3)].map((_, idx) => (
+               <div key={idx} className="glass-panel rounded-2xl p-6 animate-pulse flex justify-between items-center">
+                 <div className="flex flex-col gap-2 w-1/3">
+                   <div className="h-6 bg-outline-variant/30 rounded w-full"></div>
+                   <div className="h-4 bg-outline-variant/30 rounded w-1/2"></div>
+                 </div>
+                 <div className="h-6 bg-outline-variant/30 rounded w-16"></div>
+               </div>
+            ))}
+          </div>
+        ) : projects?.length === 0 && !isCreating ? (
+          <div className="flex flex-col items-center justify-center p-16 text-center glass-panel rounded-3xl animate-in fade-in">
+            <span className="material-symbols-outlined text-6xl text-outline-variant mb-6">folder_off</span>
+            <h3 className="text-headline-md font-semibold text-on-surface">No projects yet</h3>
+            <p className="mt-3 text-body-lg text-on-surface-variant mb-8 max-w-md">Group your meetings together by creating a project to give MeetSense better context.</p>
+            <button 
+              onClick={() => setIsCreating(true)}
+              className="bg-gradient-to-r from-primary to-secondary text-white font-bold text-button px-8 py-4 rounded-full flex items-center gap-2 shadow-premium hover:opacity-90 hover:scale-105 transition-all"
+            >
+              <span className="material-symbols-outlined text-[20px]">add</span>
+              Create your first project
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {projects?.map((project, idx) => (
+              <div 
+                key={project.id} 
+                className="glass-panel rounded-3xl p-6 hover:shadow-premium hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden animate-in fade-in zoom-in-95" 
+                style={{ animationDelay: `${idx * 100}ms` }}
+              >
+                <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 text-primary flex items-center justify-center shadow-sm">
+                    <span className="material-symbols-outlined">folder</span>
+                  </div>
+                  <div>
+                    <h3 className="text-headline-md font-bold text-on-surface group-hover:text-primary transition-colors">{project.name}</h3>
+                    <p className="text-label-md font-medium text-on-surface-variant flex items-center gap-1.5 mt-1">
+                        <span className="material-symbols-outlined text-[14px]">calendar_today</span>
+                        Created {new Date(project.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+                {project.description && (
+                  <p className="text-body-lg text-on-surface-variant mt-4 line-clamp-2 leading-relaxed bg-white/40 p-3 rounded-xl border border-white/50">{project.description}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </main>
+    </div>
+  )
+}

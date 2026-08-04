@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Geist } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
+import { Toaster } from "react-hot-toast";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -35,6 +36,36 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-background text-on-surface font-body-md selection:bg-primary-fixed selection:text-on-primary-fixed">
         <Providers>{children}</Providers>
+        <Toaster
+          position="bottom-right"
+          toastOptions={{
+            className: '',
+            style: {
+              background: 'rgba(255, 255, 255, 0.7)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              border: '1px solid rgba(255, 255, 255, 0.4)',
+              color: 'var(--on-surface)',
+              boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
+              borderRadius: '16px',
+              padding: '16px',
+              fontSize: '14px',
+              fontWeight: '500'
+            },
+            success: {
+              iconTheme: {
+                primary: 'var(--status-success)',
+                secondary: 'white',
+              },
+            },
+            error: {
+              iconTheme: {
+                primary: 'var(--error)',
+                secondary: 'white',
+              },
+            },
+          }}
+        />
       </body>
     </html>
   );

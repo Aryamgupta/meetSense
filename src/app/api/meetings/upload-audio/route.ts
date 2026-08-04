@@ -6,6 +6,8 @@ export async function POST(request: Request) {
     const formData = await request.formData()
     const file = formData.get('file') as File
     const title = formData.get('title') as string
+    const projectId = formData.get('project_id') as string
+    const seriesId = formData.get('series_id') as string
 
     if (!file) {
       return NextResponse.json({ error: 'No audio file provided' }, { status: 400 })
@@ -44,7 +46,6 @@ export async function POST(request: Request) {
     groqFormData.append('file', file)
     groqFormData.append('model', 'whisper-large-v3-turbo')
     groqFormData.append('response_format', 'json')
-    groqFormData.append('language', 'en')
 
     const groqResponse = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
       method: 'POST',
@@ -72,6 +73,8 @@ export async function POST(request: Request) {
         raw_transcript: rawTranscript,
         audio_url: audioUrl,
         status: 'processing',
+        project_id: projectId || null,
+        series_id: seriesId || null,
       })
       .select('id')
       .single()

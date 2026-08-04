@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/server'
 
 export async function POST(request: Request) {
   try {
-    const { transcript, title } = await request.json()
+    const { transcript, title, project_id, series_id } = await request.json()
     const supabase = await createClient()
 
     const { data: userData, error: authError } = await supabase.auth.getUser()
@@ -19,6 +19,8 @@ export async function POST(request: Request) {
         title: title || 'Untitled Meeting',
         raw_transcript: transcript,
         status: 'processing',
+        project_id: project_id || null,
+        series_id: series_id || null,
       })
       .select('id')
       .single()
