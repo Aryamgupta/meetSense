@@ -55,7 +55,7 @@ export default function LandingPage() {
                 Focus on the conversation
               </h2>
               <p className="text-body-lg text-on-surface-variant">
-                Three simple steps to a more productive workflow.
+                Four simple steps to a more productive workflow.
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
@@ -97,7 +97,7 @@ export default function LandingPage() {
                 </div>
                 <h3 className="text-headline-sm font-bold text-on-surface mb-3">4. Ask MeetSense</h3>
                 <p className="text-body-md text-on-surface-variant max-w-[240px]">
-                  Chat directly with your knowledge base to get instant, cited answers.
+                  Use our powerful semantic search to chat with your knowledge base and get instant, cited answers.
                 </p>
               </div>
             </div>
