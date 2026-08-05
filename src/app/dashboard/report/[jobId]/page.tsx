@@ -60,10 +60,10 @@ export default function ReportPage() {
       // We load html2pdf dynamically so it doesn't break SSR
       const html2pdf = (await import('html2pdf.js')).default;
       
-      const opt = {
+      const opt: any = {
         margin:       0.5,
         filename:     `meetsense_report_${Date.now()}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
+        image:        { type: 'jpeg' as const, quality: 0.98 },
         html2canvas:  { scale: 2, useCORS: true },
         jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
       };
