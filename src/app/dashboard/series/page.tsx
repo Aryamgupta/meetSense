@@ -20,7 +20,7 @@ export default function SeriesPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('meeting_series')
-        .select('*')
+        .select('*, meetings(count)')
         .order('created_at', { ascending: false })
       if (error) throw error
       return data || []
@@ -150,7 +150,8 @@ export default function SeriesPage() {
             {seriesList?.map((s, idx) => (
               <div 
                 key={s.id} 
-                className="glass-panel rounded-3xl p-6 hover:shadow-premium hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden animate-in fade-in zoom-in-95" 
+                onClick={() => router.push(`/dashboard/series/${s.id}`)}
+                className="glass-panel rounded-3xl p-6 hover:shadow-premium hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden animate-in fade-in zoom-in-95 cursor-pointer" 
                 style={{ animationDelay: `${idx * 100}ms` }}
               >
                 <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -169,6 +170,12 @@ export default function SeriesPage() {
                 {s.description && (
                   <p className="text-body-lg text-on-surface-variant mt-4 line-clamp-2 leading-relaxed bg-white/40 p-3 rounded-xl border border-white/50">{s.description}</p>
                 )}
+                <div className="mt-4 pt-4 border-t border-outline-variant/30 flex justify-end">
+                  <span className="text-label-md font-bold text-primary bg-primary/10 px-3 py-1 rounded-full border border-primary/20 flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[14px]">video_camera_front</span>
+                    {s.meetings[0]?.count || 0} Meetings
+                  </span>
+                </div>
               </div>
             ))}
           </div>

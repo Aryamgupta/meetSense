@@ -1,166 +1,161 @@
 'use client'
 
-import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
-export default function DashboardPage() {
+export default function OverviewDashboardPage() {
   const supabase = createClient()
   const router = useRouter()
-  const queryClient = useQueryClient()
-  
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [filterStatus, setFilterStatus] = useState<'all' | 'completed' | 'processing'>('all')
-  const [showFilterMenu, setShowFilterMenu] = useState(false)
 
-  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && searchQuery.trim()) {
-      router.push(`/dashboard/search?q=${encodeURIComponent(searchQuery.trim())}`)
-    }
-  }
-
-  const { data: meetings, isLoading } = useQuery({
-    queryKey: ['meetings'],
+  const { data: stats, isLoading: statsLoading } = useQuery({
+    queryKey: ['dashboard-stats'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('meetings')
-        .select('*')
-        .order('created_at', { ascending: false })
-      if (error) throw error
-      return data
+      const [meetings, projects, series] = await Promise.all([
+        supabase.from('meetings').select('id', { count: 'exact', head: true }),
+        supabase.from('projects').select('id', { count: 'exact', head: true }),
+        supabase.from('meeting_series').select('id', { count: 'exact', head: true })
+      ])
+      
+      return {
+        totalMeetings: meetings.count || 0,
+        totalProjects: projects.count || 0,
+        totalSeries: series.count || 0
+      }
     }
   })
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push('/login')
-  }
-
-
-  const filteredMeetings = meetings?.filter(m => {
-    const matchesSearch = m.title.toLowerCase().includes(searchQuery.toLowerCase()) || m.summary?.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesFilter = filterStatus === 'all' || m.status === filterStatus
-    return matchesSearch && matchesFilter
+  const { data: recentMeetings, isLoading: recentLoading } = useQuery({
+    queryKey: ['recent-meetings'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('meetings')
+        .select('*, project:projects(name), series:meeting_series(name)')
+        .order('created_at', { ascending: false })
+        .limit(3)
+      if (error) throw error
+      return data
+    }
   })
 
   return (
     <div className="text-on-surface h-full w-full">
       <main className="px-margin-mobile py-stack-lg max-w-5xl mx-auto">
         <div className="flex justify-between items-center mb-10">
-          <h1 className="text-display font-display font-bold gradient-text">Dashboard</h1>
+          <div>
+            <h1 className="text-display font-display font-bold gradient-text mb-2">Overview</h1>
+            <p className="text-body-lg text-on-surface-variant">Welcome to your intelligence hub.</p>
+          </div>
           <button onClick={() => router.push('/dashboard/new')} className="bg-gradient-to-r from-primary to-secondary text-white text-button px-6 py-3 rounded-full flex items-center gap-2 shadow-premium hover:shadow-lg hover:scale-105 transition-all">
             <span className="material-symbols-outlined text-[20px]">add</span>
             <span className="hidden sm:inline">New Meeting</span>
           </button>
         </div>
 
-        <div className="mb-10 flex gap-4">
-          <div className="relative flex-1">
-            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-primary text-[24px]">search</span>
-            <input 
-              className="w-full glass-input rounded-full pl-14 pr-6 py-4 text-body-lg shadow-sm focus:shadow-premium outline-none transition-all" 
-              placeholder="Search meetings by title or content..." 
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={handleSearchKeyDown}
-            />
-          </div>
-          <div className="relative flex-shrink-0">
-            <button 
-              onClick={() => setShowFilterMenu(!showFilterMenu)}
-              className={`p-4 glass-panel rounded-full hover:text-secondary hover:shadow-premium transition-all ${filterStatus !== 'all' ? 'text-secondary bg-white/60 border-primary/50' : 'text-primary'}`}
-            >
-              <span className="material-symbols-outlined">filter_list</span>
-            </button>
-            {showFilterMenu && (
-              <div className="absolute right-0 top-full mt-2 w-48 glass-panel shadow-premium rounded-2xl p-2 z-50 animate-in fade-in zoom-in-95 bg-surface/80 backdrop-blur-xl border border-outline-variant/30">
-                <button onClick={() => {setFilterStatus('all'); setShowFilterMenu(false)}} className={`w-full text-left px-4 py-2 rounded-xl transition-colors ${filterStatus === 'all' ? 'bg-primary/20 text-primary font-bold' : 'hover:bg-white/40'}`}>All Meetings</button>
-                <button onClick={() => {setFilterStatus('completed'); setShowFilterMenu(false)}} className={`w-full text-left px-4 py-2 rounded-xl transition-colors ${filterStatus === 'completed' ? 'bg-status-success/20 text-status-success font-bold' : 'hover:bg-white/40'}`}>Completed</button>
-                <button onClick={() => {setFilterStatus('processing'); setShowFilterMenu(false)}} className={`w-full text-left px-4 py-2 rounded-xl transition-colors ${filterStatus === 'processing' ? 'bg-primary/20 text-primary font-bold' : 'hover:bg-white/40'}`}>Processing</button>
+        {/* Analytics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <div className="glass-panel p-6 rounded-3xl border border-primary/20 shadow-sm hover:shadow-premium hover:-translate-y-1 transition-all cursor-pointer group" onClick={() => router.push('/dashboard/meetings')}>
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                <span className="material-symbols-outlined">video_camera_front</span>
               </div>
+              <h3 className="text-headline-sm font-bold text-on-surface-variant">Total Meetings</h3>
+            </div>
+            <div className="text-4xl font-display font-bold text-on-surface">
+              {statsLoading ? <span className="animate-pulse">--</span> : stats?.totalMeetings}
+            </div>
+          </div>
+
+          <div className="glass-panel p-6 rounded-3xl border border-secondary/20 shadow-sm hover:shadow-premium hover:-translate-y-1 transition-all cursor-pointer group" onClick={() => router.push('/dashboard/projects')}>
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center text-secondary group-hover:scale-110 transition-transform">
+                <span className="material-symbols-outlined">folder_open</span>
+              </div>
+              <h3 className="text-headline-sm font-bold text-on-surface-variant">Active Projects</h3>
+            </div>
+            <div className="text-4xl font-display font-bold text-on-surface">
+              {statsLoading ? <span className="animate-pulse">--</span> : stats?.totalProjects}
+            </div>
+          </div>
+
+          <div className="glass-panel p-6 rounded-3xl border border-primary/20 shadow-sm hover:shadow-premium hover:-translate-y-1 transition-all cursor-pointer group" onClick={() => router.push('/dashboard/series')}>
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                <span className="material-symbols-outlined">dynamic_feed</span>
+              </div>
+              <h3 className="text-headline-sm font-bold text-on-surface-variant">Active Series</h3>
+            </div>
+            <div className="text-4xl font-display font-bold text-on-surface">
+              {statsLoading ? <span className="animate-pulse">--</span> : stats?.totalSeries}
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-headline-md font-bold text-on-surface">Recent Activity</h2>
+            <Link href="/dashboard/meetings" className="text-primary font-bold hover:underline">View All</Link>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            {recentLoading ? (
+              [...Array(3)].map((_, idx) => (
+                <div key={idx} className="glass-panel p-6 rounded-2xl animate-pulse flex items-center gap-4">
+                  <div className="w-10 h-10 bg-outline-variant/30 rounded-full flex-shrink-0"></div>
+                  <div className="flex flex-col gap-2 w-full">
+                    <div className="h-5 bg-outline-variant/30 rounded w-1/3"></div>
+                    <div className="h-4 bg-outline-variant/30 rounded w-1/4"></div>
+                  </div>
+                </div>
+              ))
+            ) : recentMeetings?.length === 0 ? (
+              <div className="glass-panel p-8 rounded-2xl text-center text-on-surface-variant">
+                No recent activity. Upload a meeting to get started!
+              </div>
+            ) : (
+              recentMeetings?.map((meeting) => (
+                <div 
+                  key={meeting.id}
+                  onClick={() => router.push(`/dashboard/meetings/${meeting.id}`)}
+                  className="glass-panel p-5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 hover:shadow-premium hover:-translate-y-0.5 transition-all cursor-pointer border border-white/40"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-primary/10 text-primary rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="material-symbols-outlined">mic</span>
+                    </div>
+                    <div>
+                      <h4 className="text-headline-sm font-bold text-on-surface truncate max-w-[300px] md:max-w-md">{meeting.title}</h4>
+                      <p className="text-label-md text-on-surface-variant">
+                        {new Date(meeting.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 flex-wrap md:flex-nowrap">
+                    {meeting.project && (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/10 text-secondary text-label-sm font-bold border border-secondary/20">
+                        <span className="material-symbols-outlined text-[14px]">folder</span>
+                        {meeting.project.name}
+                      </span>
+                    )}
+                    {meeting.series && (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-label-sm font-bold border border-primary/20">
+                        <span className="material-symbols-outlined text-[14px]">layers</span>
+                        {meeting.series.name}
+                      </span>
+                    )}
+                    <span className={`px-3 py-1 rounded-full text-label-sm font-bold ${meeting.status === 'completed' ? 'bg-status-success/20 text-status-success' : 'bg-primary/20 text-primary'}`}>
+                      {meeting.status}
+                    </span>
+                  </div>
+                </div>
+              ))
             )}
           </div>
         </div>
 
-        <div className="flex flex-col gap-6">
-          {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[...Array(4)].map((_, idx) => (
-              <div key={idx} className="glass-panel rounded-3xl p-6 relative overflow-hidden">
-                <div className="animate-pulse flex flex-col h-full">
-                  <div className="flex justify-between items-start mb-4 gap-4">
-                    <div className="flex flex-col gap-2 w-full">
-                      <div className="h-6 bg-outline-variant/30 rounded w-3/4"></div>
-                      <div className="h-4 bg-outline-variant/30 rounded w-1/4 mt-1"></div>
-                    </div>
-                    <div className="h-7 w-20 bg-outline-variant/30 rounded-full flex-shrink-0"></div>
-                  </div>
-                  <div className="h-4 bg-outline-variant/30 rounded w-full mb-2 mt-4"></div>
-                  <div className="h-4 bg-outline-variant/30 rounded w-5/6"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : filteredMeetings?.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-16 text-center glass-panel rounded-3xl animate-in fade-in">
-              <span className="material-symbols-outlined text-6xl text-outline-variant mb-6">mic</span>
-              <h3 className="text-headline-md font-semibold text-on-surface">No meetings yet</h3>
-              <p className="mt-3 text-body-lg text-on-surface-variant max-w-md mx-auto mb-8">Get started by analyzing your first meeting transcript.</p>
-              <button 
-                onClick={() => router.push('/dashboard/new')}
-                className="bg-gradient-to-r from-primary to-secondary text-white font-bold text-button px-8 py-4 rounded-full flex items-center gap-2 shadow-premium hover:opacity-90 transition-all hover:scale-105"
-              >
-                <span className="material-symbols-outlined text-[20px]">add</span>
-                Analyze Meeting
-              </button>
-            </div>
-          ) : filteredMeetings?.length === 0 ? (
-                <div className="flex flex-col items-center justify-center p-16 text-center glass-panel rounded-3xl animate-in fade-in">
-                  <span className="material-symbols-outlined text-6xl text-outline-variant mb-6">search_off</span>
-                  <h3 className="text-headline-md font-semibold text-on-surface">No results found</h3>
-                  <p className="mt-3 text-body-lg text-on-surface-variant">We couldn't find any meetings matching your search.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {filteredMeetings?.map((meeting, idx) => (
-                    <div 
-                      key={meeting.id} 
-                      onClick={() => router.push(`/dashboard/meetings/${meeting.id}`)} 
-                      className="glass-panel rounded-3xl p-6 transition-all duration-300 cursor-pointer hover:shadow-premium hover:-translate-y-1 group relative overflow-hidden animate-in fade-in zoom-in-95"
-                      style={{ animationDelay: `${idx * 50}ms` }}
-                    >
-                      <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                      <div className="flex justify-between items-start mb-4 gap-4">
-                        <div className="flex flex-col gap-2 min-w-0">
-                          <h3 className="text-headline-md font-bold text-on-surface truncate group-hover:text-primary transition-colors" title={meeting.title}>{meeting.title}</h3>
-                          <p className="text-label-md font-medium text-on-surface-variant flex items-center gap-1.5 flex-shrink-0">
-                            <span className="material-symbols-outlined text-[14px]">calendar_today</span>
-                            {new Date(meeting.created_at).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <span className={`flex-shrink-0 px-3 py-1.5 rounded-full text-label-md font-bold shadow-sm backdrop-blur-md ${meeting.status === 'completed' ? 'bg-status-success/20 text-status-success border border-status-success/30' : 'bg-primary/20 text-primary border border-primary/30'}`}>
-                          {meeting.status}
-                        </span>
-                      </div>
-                      {meeting.summary && (
-                        <p className="text-body-lg text-on-surface-variant mb-4 line-clamp-2 bg-white/40 p-3 rounded-xl border border-white/50">{meeting.summary}</p>
-                      )}
-                      {meeting.status === 'completed' && (
-                        <div className="flex justify-end items-center mt-4">
-                          <span className="bg-gradient-to-r from-primary to-secondary text-white px-4 py-1.5 rounded-full text-label-md font-bold flex items-center gap-1.5 shadow-sm">
-                            <span className="material-symbols-outlined text-[16px]">auto_awesome</span>
-                            Analyzed
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-          )}
-        </div>
       </main>
     </div>
   )

@@ -35,6 +35,18 @@ export default function AskMeetSensePage() {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [selectedProjectId, setSelectedProjectId] = useState<string>('')
+  const [isScopeDropdownOpen, setIsScopeDropdownOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsScopeDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -112,19 +124,65 @@ export default function AskMeetSensePage() {
 
       <div className="w-full flex justify-end items-center px-4 py-4 md:px-margin-desktop mb-4 relative z-40">
         <div className="flex items-center gap-3">
-          <span className="text-label-sm text-on-surface-variant hidden sm:inline">Scope Search:</span>
-          <select
-            value={selectedProjectId}
-            onChange={(e) => setSelectedProjectId(e.target.value)}
-            className="bg-surface-container-low border border-outline-variant text-on-surface text-label-md rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary appearance-none cursor-pointer shadow-sm"
-          >
-            <option value="">All Meetings</option>
-            {projects?.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
+          <span className="text-label-sm font-bold text-on-surface-variant hidden sm:inline uppercase tracking-wider">Search Scope</span>
+          <div className="relative group" ref={dropdownRef}>
+            <button
+              onClick={() => setIsScopeDropdownOpen(!isScopeDropdownOpen)}
+              className="appearance-none glass-panel pl-11 pr-10 py-2.5 rounded-full text-label-md font-bold text-on-surface hover:shadow-premium transition-all cursor-pointer outline-none focus:ring-2 focus:ring-primary/50 border border-white/40 flex items-center min-w-[200px]"
+            >
+              <span className="truncate">
+                {selectedProjectId === '' 
+                  ? 'Global (All Meetings)' 
+                  : projects?.find(p => p.id === selectedProjectId)?.name || 'Project'}
+              </span>
+            </button>
+            <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[18px] text-primary pointer-events-none transition-all group-hover:scale-110">
+              {selectedProjectId ? 'folder' : 'public'}
+            </span>
+            <span className={`material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant pointer-events-none transition-transform duration-300 ${isScopeDropdownOpen ? 'rotate-180 text-primary' : 'group-hover:text-primary'}`}>
+              expand_more
+            </span>
+
+            {/* Custom Dropdown Options */}
+            {isScopeDropdownOpen && (
+              <div className="absolute top-full mt-2 right-0 w-64 glass-panel rounded-2xl shadow-premium border border-white/40 overflow-hidden z-50 animate-in fade-in zoom-in-95 origin-top-right py-2">
+                <button
+                  onClick={() => {
+                    setSelectedProjectId('')
+                    setIsScopeDropdownOpen(false)
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-white/40 ${selectedProjectId === '' ? 'bg-primary/10 text-primary font-bold' : 'text-on-surface font-medium'}`}
+                >
+                  <span className="material-symbols-outlined text-[20px]">public</span>
+                  Global (All Meetings)
+                  {selectedProjectId === '' && <span className="material-symbols-outlined ml-auto text-[18px]">check</span>}
+                </button>
+                
+                {projects && projects.length > 0 && (
+                  <div className="px-4 py-2 mt-2 border-t border-outline-variant/30 text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">
+                    Projects
+                  </div>
+                )}
+                
+                <div className="max-h-60 overflow-y-auto">
+                  {projects?.map((p) => (
+                    <button
+                      key={p.id}
+                      onClick={() => {
+                        setSelectedProjectId(p.id)
+                        setIsScopeDropdownOpen(false)
+                      }}
+                      className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-white/40 ${selectedProjectId === p.id ? 'bg-primary/10 text-primary font-bold' : 'text-on-surface font-medium'}`}
+                    >
+                      <span className="material-symbols-outlined text-[20px]">folder</span>
+                      <span className="truncate">{p.name}</span>
+                      {selectedProjectId === p.id && <span className="material-symbols-outlined ml-auto text-[18px]">check</span>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

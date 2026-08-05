@@ -22,6 +22,7 @@ export default function DashboardLayout({
 
   const navItems = [
     { label: 'Dashboard', href: '/dashboard', icon: 'dashboard', exact: true },
+    { label: 'All Meetings', href: '/dashboard/meetings', icon: 'video_camera_front' },
     { label: 'Projects', href: '/dashboard/projects', icon: 'folder_open' },
     { label: 'Meeting Series', href: '/dashboard/series', icon: 'dynamic_feed' },
     { label: 'Ask MeetSense', href: '/dashboard/ask', icon: 'forum' },
